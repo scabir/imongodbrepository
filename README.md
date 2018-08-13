@@ -1,8 +1,8 @@
-﻿#iMongoDB Repository
-##Usage
+﻿# iMongoDBRepository
+## Usage
 All entities must be derived from iMongoDbItem interface. This interface contains _id and some extra data needed.
 
-iMondoDbItem:
+iMongoDbItem:
 ```Csharp
 public interface IMongoDbItem
 {
@@ -57,6 +57,5 @@ static void Main(string[] args)
 
     //Retreave all items in the db
     var all = personRepo.All();
-
 }
 ```
