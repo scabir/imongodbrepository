@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 
-namespace iMongoDbRepo
+namespace iMongoDbRepository
 {
     public abstract class MongoDbRepository<TEntity> : IRepository<TEntity>
         where TEntity : class, IMongoDbItem

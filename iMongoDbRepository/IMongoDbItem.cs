@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace iMongoDbRepo
+namespace iMongoDbRepository
 {
     public interface IMongoDbItem
     {

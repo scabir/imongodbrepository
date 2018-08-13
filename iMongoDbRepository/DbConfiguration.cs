@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace iMongoDbRepo
+namespace iMongoDbRepository
 {
     public class DbConfiguration
     {

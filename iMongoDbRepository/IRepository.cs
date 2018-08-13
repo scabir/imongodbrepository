@@ -4,7 +4,7 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace iMongoDbRepo
+namespace iMongoDbRepository
 {
     public interface IRepository<TEntity> : IDisposable where TEntity : class
     {
