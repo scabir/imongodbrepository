@@ -28,6 +28,10 @@ tarballs/
 test-results/
 Thumbs.db
 .vs/
+nuget.bat
+nuget.exe
+EverLog.Client.nuspec
+
 
 # Mac bundle stuff
 *.dmg
