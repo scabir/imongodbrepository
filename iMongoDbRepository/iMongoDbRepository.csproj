@@ -3,6 +3,14 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <Version>1.1.0</Version>
+    <Authors>Suleyman Ciplak</Authors>
+    <Company />
+    <Description>A MongoDb repository pattern implementation.</Description>
+    <Copyright>Suleyman Ciplak</Copyright>
+    <PackageIconUrl>https://raw.githubusercontent.com/scabir/imongodbrepository/master/mongodbicon.png</PackageIconUrl>
+    <PackageProjectUrl>https://github.com/scabir/imongodbrepository/</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/scabir/imongodbrepository/</RepositoryUrl>
+    <PackageTags>mongodb, repository, pattern, db, database, nosql, nuget, package, document</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>
