@@ -11,13 +11,13 @@ namespace iMongoDbRepository
     public abstract class MongoDbRepository<TEntity> : IRepository<TEntity>
         where TEntity : class, IMongoDbItem
     {
+        public bool Configured { get; protected set; }
         private IMongoCollection<TEntity> _collection;
         private DbConfiguration _dbConfiguration;
-
-        protected MongoDbRepository(DbConfiguration repositoryConfiguration)
+        
+        public void Configure(DbConfiguration dbConfiguration)
         {
-            _dbConfiguration = repositoryConfiguration;
-
+            _dbConfiguration = dbConfiguration;
             //Set up MongoDb client
             var client = new MongoClient(_dbConfiguration.ConnectionString);
             var database = client.GetDatabase(_dbConfiguration.DbName);
@@ -29,6 +29,16 @@ namespace iMongoDbRepository
                 database.CreateCollection(_dbConfiguration.Collection);
                 _collection = database.GetCollection<TEntity>(_dbConfiguration.Collection);
             }
+
+            Configured = true;
+        }
+
+        private void CheckIsConfigured()
+        {
+            if (!Configured)
+            {
+                throw new Exception("Repository is not conofigured!");
+            }
         }
 
         public virtual void Dispose()
@@ -38,6 +48,8 @@ namespace iMongoDbRepository
 
         public virtual IEnumerable<TEntity> All(bool includeDeleted = false)
         {
+            CheckIsConfigured();
+
             if (includeDeleted)
             {
                 return _collection.AsQueryable().Where(x => !x.Deleted).ToEnumerable();
@@ -48,6 +60,8 @@ namespace iMongoDbRepository
 
         public virtual async Task<IEnumerable<TEntity>> AllAsync(bool includeDeleted = false)
         {
+            CheckIsConfigured();
+
             return await Task.Run(() =>
             {
                 if (includeDeleted)
@@ -61,6 +75,8 @@ namespace iMongoDbRepository
 
         public virtual IEnumerable<TEntity> Query(Expression<Func<TEntity, bool>> filter, bool includeDeleted = false)
         {
+            CheckIsConfigured();
+
             if (includeDeleted)
             {
                 return _collection.AsQueryable().Where(x => !x.Deleted).Where(filter);
@@ -71,6 +87,8 @@ namespace iMongoDbRepository
 
         public virtual async Task<IEnumerable<TEntity>> QueryAsync(Expression<Func<TEntity, bool>> filter, bool includeDeleted = false)
         {
+            CheckIsConfigured();
+
             return await Task.Run(() =>
             {
                 if (includeDeleted)
@@ -84,6 +102,8 @@ namespace iMongoDbRepository
 
         public virtual TEntity Get(string entityId, bool includeDeleted = false)
         {
+            CheckIsConfigured();
+
             if (includeDeleted)
             {
                 return _collection.AsQueryable().FirstOrDefault(x => !x.Deleted && x._id == entityId);
@@ -94,6 +114,8 @@ namespace iMongoDbRepository
 
         public virtual async Task<TEntity> GetAsync(string entityId, bool includeDeleted = false)
         {
+            CheckIsConfigured();
+
             return await Task.Run(() =>
             {
                 if (includeDeleted)
@@ -107,6 +129,8 @@ namespace iMongoDbRepository
 
         public virtual long Count(bool includeDeleted = false)
         {
+            CheckIsConfigured();
+
             if (includeDeleted)
             {
                 return _collection.CountDocuments(x => true);
@@ -117,6 +141,8 @@ namespace iMongoDbRepository
 
         public virtual async Task<long> CountAsync(bool includeDeleted = false)
         {
+            CheckIsConfigured();
+
             return await Task.Run(() => {
                 if (includeDeleted)
                 {
@@ -129,6 +155,8 @@ namespace iMongoDbRepository
 
         public virtual long Count(Expression<Func<TEntity, bool>> filter, bool includeDeleted = false)
         {
+            CheckIsConfigured();
+
             if (includeDeleted)
             {
                 return _collection.CountDocuments(filter);
@@ -139,6 +167,8 @@ namespace iMongoDbRepository
 
         public virtual async Task<long> CountAsync(Expression<Func<TEntity, bool>> filter, bool includeDeleted = false)
         {
+            CheckIsConfigured();
+
             return await Task.Run(() =>
             {
                 if (includeDeleted)
@@ -152,6 +182,8 @@ namespace iMongoDbRepository
 
         public virtual bool Any(bool includeDeleted = false)
         {
+            CheckIsConfigured();
+
             if (includeDeleted)
             {
                 return _collection.AsQueryable().FirstOrDefault() != null;
@@ -162,6 +194,8 @@ namespace iMongoDbRepository
 
         public virtual async Task<bool> AnyAsync(bool includeDeleted = false)
         {
+            CheckIsConfigured();
+
             return await Task.Run(() => {
                 if (includeDeleted)
                 {
@@ -174,6 +208,8 @@ namespace iMongoDbRepository
 
         public virtual bool Any(Expression<Func<TEntity, bool>> filter, bool includeDeleted = false)
         {
+            CheckIsConfigured();
+
             if (includeDeleted)
             {
                 return _collection.AsQueryable().FirstOrDefault(filter) != null;
@@ -184,6 +220,8 @@ namespace iMongoDbRepository
 
         public virtual async Task<bool> AnyAsync(Expression<Func<TEntity, bool>> filter, bool includeDeleted = false)
         {
+            CheckIsConfigured();
+
             return await Task.Run(() =>
             {
                 if (includeDeleted)
@@ -197,6 +235,8 @@ namespace iMongoDbRepository
 
         public virtual void Insert(TEntity entity)
         {
+            CheckIsConfigured();
+
             entity.CreatedOn = DateTime.UtcNow;
             entity.ModifiedOn = DateTime.UtcNow;
             entity.Deleted = false;
@@ -211,6 +251,8 @@ namespace iMongoDbRepository
 
         public virtual async Task InsertAsync(TEntity entity)
         {
+            CheckIsConfigured();
+
             entity.CreatedOn = DateTime.UtcNow;
             entity.ModifiedOn = DateTime.UtcNow;
             entity.Deleted = false;
@@ -225,6 +267,8 @@ namespace iMongoDbRepository
 
         public virtual void Insert(IEnumerable<TEntity> entities)
         {
+            CheckIsConfigured();
+
             for (int i = 0; i < entities.Count(); i++)
             {
                 entities.ElementAt(i).CreatedOn = DateTime.UtcNow;
@@ -242,6 +286,8 @@ namespace iMongoDbRepository
 
         public virtual async Task InsertAsync(IEnumerable<TEntity> entities)
         {
+            CheckIsConfigured();
+
             for (int i = 0; i < entities.Count(); i++)
             {
                 entities.ElementAt(i).CreatedOn = DateTime.UtcNow;
@@ -259,6 +305,8 @@ namespace iMongoDbRepository
 
         public virtual void Update(TEntity entity)
         {
+            CheckIsConfigured();
+
             if (entity == null)
             {
                 throw new NullReferenceException("Entity cannot be null.");
@@ -270,6 +318,8 @@ namespace iMongoDbRepository
 
         public virtual async Task UpdateAsync(TEntity entity)
         {
+            CheckIsConfigured();
+
             if (entity == null)
             {
                 throw new NullReferenceException("Entity cannot be null.");
@@ -281,6 +331,8 @@ namespace iMongoDbRepository
 
         public virtual void Upsert(TEntity entity)
         {
+            CheckIsConfigured();
+
             if (entity == null)
             {
                 throw new NullReferenceException("Entity cannot be null.");
@@ -307,6 +359,8 @@ namespace iMongoDbRepository
 
         public virtual async void UpsertAsync(TEntity entity)
         {
+            CheckIsConfigured();
+
             if (entity == null)
             {
                 throw new NullReferenceException("Entity cannot be null.");
@@ -331,6 +385,8 @@ namespace iMongoDbRepository
 
         public virtual void Delete(string entityId, bool hardDelete = false)
         {
+            CheckIsConfigured();
+
             if (hardDelete)
             {
                 _collection.DeleteOne(x => x._id == entityId);
@@ -349,6 +405,8 @@ namespace iMongoDbRepository
 
         public virtual async Task DeleteAsync(string entityId, bool hardDelete = false)
         {
+            CheckIsConfigured();
+
             if (hardDelete)
             {
                 await _collection.DeleteOneAsync(x => x._id == entityId);
@@ -367,6 +425,8 @@ namespace iMongoDbRepository
 
         public virtual void Delete(IEnumerable<string> entityIds, bool hardDelete = false)
         {
+            CheckIsConfigured();
+
             if (hardDelete)
             {
                 _collection.DeleteMany(x => entityIds.Contains(x._id));
@@ -388,6 +448,8 @@ namespace iMongoDbRepository
 
         public virtual async Task DeleteAsync(IEnumerable<string> entityIds, bool hardDelete = false)
         {
+            CheckIsConfigured();
+
             if (hardDelete)
             {
                 await _collection.DeleteManyAsync(x => entityIds.Contains(x._id));
@@ -414,6 +476,8 @@ namespace iMongoDbRepository
 
         public virtual void UnDelete(string entityId)
         {
+            CheckIsConfigured();
+
             var item = Get(entityId);
 
             if (item != null)
@@ -425,6 +489,8 @@ namespace iMongoDbRepository
 
         public virtual async Task UnDeleteAsync(string entityId)
         {
+            CheckIsConfigured();
+
             var item = await GetAsync(entityId);
 
             if (item != null)

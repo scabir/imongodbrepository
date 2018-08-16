@@ -8,6 +8,10 @@ namespace iMongoDbRepository
 {
     public interface IRepository<TEntity> : IDisposable where TEntity : class
     {
+        bool Configured { get; }
+
+        void Configure(DbConfiguration dbConfiguration);
+
         /// <summary>
         ///     Returns all item on the database
         /// </summary>
