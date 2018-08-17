@@ -4,23 +4,19 @@ Requires .Net Standard 2.1+
 ## Usage
 All entities must be derived from iMongoDbItem interface. This interface contains _id and some extra data needed.
 
-iMongoDbItem:
-```Csharp
-public interface IMongoDbItem
-{
-    string _id { get; set; }
-    DateTime CreatedOn { get; set; }
-    DateTime ModifiedOn { get; set; }
-    bool Deleted { get; set; }
-}
-```
-
 Let's say you have an object called person as follows;
 ```CSharp
-public class Person: IMongoDbItem
+public class Person
 {
     public string Name { get; set; }
     public string Surname { get; set; }
+}
+```
+
+Then you create an entity class for the person object.
+```CSharp
+public class PersonEntity: Person, IMongoDbItem
+{
     public string _id { get; set; }
     public DateTime CreatedOn { get; set; }
     public DateTime ModifiedOn { get; set; }
@@ -30,7 +26,7 @@ public class Person: IMongoDbItem
 
 First create a repository class;
 ```Csharp
-public class PersonRepo : MongoDbRepository<Person>
+public class PersonRepo : MongoDbRepository<PersonEntity>
 {
 
 } 
@@ -51,7 +47,7 @@ static void Main(string[] args)
     });
 
     //Your object is ready
-    var person = new Person();
+    var person = new PersonEntity();
 
     //Insert person object
     personRepo.Insert(person);
@@ -66,12 +62,12 @@ Then, derive your class from the interface and MongoDbRepository abstract class 
 
 ## Usage with Dependancy Injection
 ```Csharp
-public class IPersonRepo : MongoDbRepository<Person>
+public class IPersonRepo : MongoDbRepository<PersonEntity>
 {
 
 } 
 
-public class PersonRepo : IPersonRepo, MongoDbRepository<Person>
+public class PersonRepo : IPersonRepo, MongoDbRepository<PersonEntity>
 {
 
 } 
