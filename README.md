@@ -1,8 +1,15 @@
 ﻿# iMongoDbRepository
 Requires .Net Standard 2.1+
 
+## Nuget Package
+```
+PM> Install-Package iMongoDbRepository
+```
+URL: https://www.nuget.org/packages/iMongoDbRepository/1.1.0
+
+
 ## Usage
-All entities must be derived from iMongoDbItem interface. This interface contains _id and some extra data needed.
+All entities must be derived from an interface called ```IMongoDbItem```. This interface contains a mandatory field called ```_id```  and some extra data needed.
 
 Let's say you have an object called person as follows;
 ```CSharp
@@ -13,7 +20,7 @@ public class Person
 }
 ```
 
-Then you create an entity class for the person object.
+Then you create an entity class for the person object just to satisfy IMongoDbItem interface.
 ```CSharp
 public class PersonEntity: Person, IMongoDbItem
 {
