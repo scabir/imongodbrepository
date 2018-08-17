@@ -1,4 +1,6 @@
 ﻿# iMongoDbRepository
+Requires .Net Standard 2.1+
+
 ## Usage
 All entities must be derived from iMongoDbItem interface. This interface contains _id and some extra data needed.
 
