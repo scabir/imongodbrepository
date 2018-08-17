@@ -69,7 +69,7 @@ Then, derive your class from the interface and MongoDbRepository abstract class 
 
 ## Usage with Dependancy Injection
 ```Csharp
-public class IPersonRepo : MongoDbRepository<PersonEntity>
+public class IPersonRepo : IRepository<PersonEntity>
 {
 
 } 
