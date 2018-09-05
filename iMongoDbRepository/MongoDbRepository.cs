@@ -50,7 +50,7 @@ namespace iMongoDbRepository
         {
             CheckIsConfigured();
 
-            if (includeDeleted)
+            if (!includeDeleted)
             {
                 return _collection.AsQueryable().Where(x => !x.Deleted).ToEnumerable();
             }
@@ -64,7 +64,7 @@ namespace iMongoDbRepository
 
             return await Task.Run(() =>
             {
-                if (includeDeleted)
+                if (!includeDeleted)
                 {
                     return _collection.AsQueryable().Where(x => !x.Deleted).ToEnumerable();
                 }
@@ -77,7 +77,7 @@ namespace iMongoDbRepository
         {
             CheckIsConfigured();
 
-            if (includeDeleted)
+            if (!includeDeleted)
             {
                 return _collection.AsQueryable().Where(x => !x.Deleted).Where(filter);
             }
@@ -91,7 +91,7 @@ namespace iMongoDbRepository
 
             return await Task.Run(() =>
             {
-                if (includeDeleted)
+                if (!includeDeleted)
                 {
                     return _collection.AsQueryable().Where(x => !x.Deleted).Where(filter);
                 }
@@ -104,7 +104,7 @@ namespace iMongoDbRepository
         {
             CheckIsConfigured();
 
-            if (includeDeleted)
+            if (!includeDeleted)
             {
                 return _collection.AsQueryable().FirstOrDefault(x => !x.Deleted && x._id == entityId);
             }
@@ -118,7 +118,7 @@ namespace iMongoDbRepository
 
             return await Task.Run(() =>
             {
-                if (includeDeleted)
+                if (!includeDeleted)
                 {
                     return _collection.AsQueryable().FirstOrDefault(x => !x.Deleted && x._id == entityId);
                 }
@@ -131,7 +131,7 @@ namespace iMongoDbRepository
         {
             CheckIsConfigured();
 
-            if (includeDeleted)
+            if (!includeDeleted)
             {
                 return _collection.CountDocuments(x => true);
             }
@@ -144,7 +144,7 @@ namespace iMongoDbRepository
             CheckIsConfigured();
 
             return await Task.Run(() => {
-                if (includeDeleted)
+                if (!includeDeleted)
                 {
                     return _collection.CountDocuments(x => true);
                 }
@@ -157,7 +157,7 @@ namespace iMongoDbRepository
         {
             CheckIsConfigured();
 
-            if (includeDeleted)
+            if (!includeDeleted)
             {
                 return _collection.CountDocuments(filter);
             }
@@ -171,7 +171,7 @@ namespace iMongoDbRepository
 
             return await Task.Run(() =>
             {
-                if (includeDeleted)
+                if (!includeDeleted)
                 {
                     return _collection.CountDocuments(filter);
                 }
@@ -184,7 +184,7 @@ namespace iMongoDbRepository
         {
             CheckIsConfigured();
 
-            if (includeDeleted)
+            if (!includeDeleted)
             {
                 return _collection.AsQueryable().FirstOrDefault() != null;
             }
@@ -197,7 +197,7 @@ namespace iMongoDbRepository
             CheckIsConfigured();
 
             return await Task.Run(() => {
-                if (includeDeleted)
+                if (!includeDeleted)
                 {
                     return _collection.AsQueryable().FirstOrDefault() != null;
                 }
@@ -210,7 +210,7 @@ namespace iMongoDbRepository
         {
             CheckIsConfigured();
 
-            if (includeDeleted)
+            if (!includeDeleted)
             {
                 return _collection.AsQueryable().FirstOrDefault(filter) != null;
             }
@@ -224,7 +224,7 @@ namespace iMongoDbRepository
 
             return await Task.Run(() =>
             {
-                if (includeDeleted)
+                if (!includeDeleted)
                 {
                     return _collection.AsQueryable().FirstOrDefault(filter) != null;
                 }
