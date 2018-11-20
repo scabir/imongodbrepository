@@ -74,7 +74,7 @@ public class IPersonRepo : IRepository<PersonEntity>
 
 } 
 
-public class PersonRepo : IPersonRepo, MongoDbRepository<PersonEntity>
+public class PersonRepo : MongoDbRepository<PersonEntity>, IPersonRepo
 {
 
 } 
