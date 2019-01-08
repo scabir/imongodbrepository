@@ -5,7 +5,7 @@ Requires .Net Standard 2.1+
 ```
 PM> Install-Package iMongoDbRepository
 ```
-URL: https://www.nuget.org/packages/iMongoDbRepository/1.1.0
+URL: https://www.nuget.org/packages/iMongoDbRepository
 
 
 ## Usage
