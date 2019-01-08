@@ -14,7 +14,7 @@ namespace iMongoDbRepository
         public bool Configured { get; protected set; }
         private IMongoCollection<TEntity> _collection;
         private DbConfiguration _dbConfiguration;
-        
+
         public void Configure(DbConfiguration dbConfiguration)
         {
             _dbConfiguration = dbConfiguration;
@@ -22,7 +22,7 @@ namespace iMongoDbRepository
             var client = new MongoClient(_dbConfiguration.ConnectionString);
             var database = client.GetDatabase(_dbConfiguration.DbName);
             _collection = database.GetCollection<TEntity>(_dbConfiguration.Collection);
-
+            
             //Create the collection if doesn't exist
             if (database.ListCollections().ToList().All(x => x.GetElement("name").Value.ToString() != _dbConfiguration.Collection))
             {
@@ -58,6 +58,32 @@ namespace iMongoDbRepository
             return _collection.AsQueryable().ToEnumerable();
         }
 
+        public virtual IEnumerable<TEntity> All(int maxNumberOfRows, bool includeDeleted = false)
+        {
+            CheckIsConfigured();
+
+            var result = new List<TEntity>();
+            var cursor = includeDeleted
+                ? _collection.FindAsync(x => true, new FindOptions<TEntity>()).Result
+                : _collection.FindAsync(x => !x.Deleted, new FindOptions<TEntity>()).Result;
+
+            using (cursor)
+            {
+                while (cursor.MoveNextAsync().Result)
+                {
+                    if (result.Count() + cursor.Current.Count() >= maxNumberOfRows)
+                    {
+                        result.AddRange(cursor.Current.Take(maxNumberOfRows - result.Count));
+                        break;
+                    }
+
+                    result.AddRange(cursor.Current);
+                }
+            }
+
+            return result;
+        }
+
         public virtual async Task<IEnumerable<TEntity>> AllAsync(bool includeDeleted = false)
         {
             CheckIsConfigured();
@@ -73,6 +99,33 @@ namespace iMongoDbRepository
             });
         }
 
+        public virtual async Task<IEnumerable<TEntity>> AllAsync(int maxNumberOfRows, bool includeDeleted = false)
+        {
+            CheckIsConfigured();
+
+            var result = new List<TEntity>();
+
+            var cursor = includeDeleted
+                ? await _collection.FindAsync(x => true, new FindOptions<TEntity>())
+                : await _collection.FindAsync(x => !x.Deleted, new FindOptions<TEntity>());
+            
+            using (cursor)
+            {
+                while (await cursor.MoveNextAsync())
+                {
+                    if (result.Count() + cursor.Current.Count() >= maxNumberOfRows)
+                    {
+                        result.AddRange(cursor.Current.Take(maxNumberOfRows - result.Count));
+                        break;
+                    }
+
+                    result.AddRange(cursor.Current);
+                }
+            }
+
+            return result;
+        }
+
         public virtual IEnumerable<TEntity> Query(Expression<Func<TEntity, bool>> filter, bool includeDeleted = false)
         {
             CheckIsConfigured();
@@ -83,6 +136,33 @@ namespace iMongoDbRepository
             }
 
             return _collection.AsQueryable().Where(filter);
+        }
+
+        public virtual IEnumerable<TEntity> Query(Expression<Func<TEntity, bool>> filter, int maxNumberOfRows, bool includeDeleted = false)
+        {
+            CheckIsConfigured();
+
+            var result = new List<TEntity>();
+
+            using (var cursor = _collection.FindAsync(filter, new FindOptions<TEntity>()).Result)
+            {
+                while (cursor.MoveNextAsync().Result)
+                {
+                    var selectedPart = includeDeleted
+                        ? cursor.Current
+                        : cursor.Current.Where(x => !x.Deleted);
+
+                    if (result.Count() + selectedPart.Count() >= maxNumberOfRows)
+                    {
+                        result.AddRange(selectedPart.Take(maxNumberOfRows - result.Count));
+                        break;
+                    }
+
+                    result.AddRange(selectedPart);
+                }
+            }
+
+            return result;
         }
 
         public virtual async Task<IEnumerable<TEntity>> QueryAsync(Expression<Func<TEntity, bool>> filter, bool includeDeleted = false)
@@ -98,6 +178,33 @@ namespace iMongoDbRepository
 
                 return _collection.AsQueryable().Where(filter);
             });
+        }
+
+        public virtual async Task<IEnumerable<TEntity>> QueryAsync(Expression<Func<TEntity, bool>> filter, int maxNumberOfRows, bool includeDeleted = false)
+        {
+            CheckIsConfigured();
+
+            var result = new List<TEntity>();
+
+            using (var cursor = await _collection.FindAsync(filter, new FindOptions<TEntity>()))
+            {
+                while (await cursor.MoveNextAsync())
+                {
+                    var selectedPart = includeDeleted
+                        ? cursor.Current
+                        : cursor.Current.Where(x => !x.Deleted);
+
+                    if (result.Count() + selectedPart.Count() >= maxNumberOfRows)
+                    {
+                        result.AddRange(selectedPart.Take(maxNumberOfRows - result.Count));
+                        break;
+                    }
+
+                    result.AddRange(selectedPart);
+                }
+            }
+
+            return result;
         }
 
         public virtual TEntity Get(string entityId, bool includeDeleted = false)
