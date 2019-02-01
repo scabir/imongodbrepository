@@ -15,21 +15,23 @@ namespace iMongoDbRepository
         /// <summary>
         ///     Returns all item on the database
         /// </summary>
+        /// <param name="maxNumberOfRows"></param>
         /// <param name="includeDeleted">Includes soft deleted items</param>
         /// <returns></returns>
-        IEnumerable<TEntity> All(bool includeDeleted = false);
+        IEnumerable<TEntity> All(int maxNumberOfRows = 100000, bool includeDeleted = false);
 
-        Task<IEnumerable<TEntity>> AllAsync(bool includeDeleted = false);
+        Task<IEnumerable<TEntity>> AllAsync(int maxNumberOfRows = 100000, bool includeDeleted = false);
 
         /// <summary>
-        ///     Pass your query in as a parameter
+        /// Pass your query in as a parameter
         /// </summary>
         /// <param name="filter"></param>
+        /// <param name="maxNumberOfRows"></param>
         /// <param name="includeDeleted">Includes soft deleted items</param>
         /// <returns></returns>
-        IEnumerable<TEntity> Query(Expression<Func<TEntity, bool>> filter, bool includeDeleted = false);
+        IEnumerable<TEntity> Query(Expression<Func<TEntity, bool>> filter, int maxNumberOfRows = 100000, bool includeDeleted = false);
 
-        Task<IEnumerable<TEntity>> QueryAsync(Expression<Func<TEntity, bool>> filter, bool includeDeleted = false);
+        Task<IEnumerable<TEntity>> QueryAsync(Expression<Func<TEntity, bool>> filter, int maxNumberOfRows = 100000, bool includeDeleted = false);
 
         /// <summary>
         ///     Get a single item

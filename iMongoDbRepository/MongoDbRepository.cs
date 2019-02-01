@@ -14,6 +14,7 @@ namespace iMongoDbRepository
         public bool Configured { get; protected set; }
         private IMongoCollection<TEntity> _collection;
         private DbConfiguration _dbConfiguration;
+        private const int MaxNumberOfRows = 100000;
 
         public void Configure(DbConfiguration dbConfiguration)
         {
@@ -46,19 +47,20 @@ namespace iMongoDbRepository
             //No need to dispose MongoDB client manually
         }
 
-        public virtual IEnumerable<TEntity> All(bool includeDeleted = false)
-        {
-            CheckIsConfigured();
+        //public virtual IEnumerable<TEntity> All(bool includeDeleted = false)
+        //{
+        //    CheckIsConfigured();
 
-            if (!includeDeleted)
-            {
-                return _collection.AsQueryable().Where(x => !x.Deleted).ToEnumerable();
-            }
+        //    if (!includeDeleted)
+        //    {
+        //        return _collection.AsQueryable().Where(x => !x.Deleted).ToEnumerable();
+        //    }
 
-            return _collection.AsQueryable().ToEnumerable();
-        }
 
-        public virtual IEnumerable<TEntity> All(int maxNumberOfRows, bool includeDeleted = false)
+        //    return _collection.AsQueryable().ToEnumerable();
+        //}
+
+        public virtual IEnumerable<TEntity> All(int maxNumberOfRows = MaxNumberOfRows, bool includeDeleted = false)
         {
             CheckIsConfigured();
 
@@ -84,22 +86,22 @@ namespace iMongoDbRepository
             return result;
         }
 
-        public virtual async Task<IEnumerable<TEntity>> AllAsync(bool includeDeleted = false)
-        {
-            CheckIsConfigured();
+        //public virtual async Task<IEnumerable<TEntity>> AllAsync(bool includeDeleted = false)
+        //{
+        //    CheckIsConfigured();
 
-            return await Task.Run(() =>
-            {
-                if (!includeDeleted)
-                {
-                    return _collection.AsQueryable().Where(x => !x.Deleted).ToEnumerable();
-                }
+        //    return await Task.Run(() =>
+        //    {
+        //        if (!includeDeleted)
+        //        {
+        //            return _collection.AsQueryable().Where(x => !x.Deleted).ToEnumerable();
+        //        }
 
-                return _collection.AsQueryable().ToEnumerable();
-            });
-        }
+        //        return _collection.AsQueryable().ToEnumerable();
+        //    });
+        //}
 
-        public virtual async Task<IEnumerable<TEntity>> AllAsync(int maxNumberOfRows, bool includeDeleted = false)
+        public virtual async Task<IEnumerable<TEntity>> AllAsync(int maxNumberOfRows = MaxNumberOfRows, bool includeDeleted = false)
         {
             CheckIsConfigured();
 
@@ -126,19 +128,19 @@ namespace iMongoDbRepository
             return result;
         }
 
-        public virtual IEnumerable<TEntity> Query(Expression<Func<TEntity, bool>> filter, bool includeDeleted = false)
-        {
-            CheckIsConfigured();
+        //public virtual IEnumerable<TEntity> Query(Expression<Func<TEntity, bool>> filter, bool includeDeleted = false)
+        //{
+        //    CheckIsConfigured();
 
-            if (!includeDeleted)
-            {
-                return _collection.AsQueryable().Where(x => !x.Deleted).Where(filter);
-            }
+        //    if (!includeDeleted)
+        //    {
+        //        return _collection.AsQueryable().Where(x => !x.Deleted).Where(filter);
+        //    }
 
-            return _collection.AsQueryable().Where(filter);
-        }
+        //    return _collection.AsQueryable().Where(filter);
+        //}
 
-        public virtual IEnumerable<TEntity> Query(Expression<Func<TEntity, bool>> filter, int maxNumberOfRows, bool includeDeleted = false)
+        public virtual IEnumerable<TEntity> Query(Expression<Func<TEntity, bool>> filter, int maxNumberOfRows = MaxNumberOfRows, bool includeDeleted = false)
         {
             CheckIsConfigured();
 
@@ -165,22 +167,22 @@ namespace iMongoDbRepository
             return result;
         }
 
-        public virtual async Task<IEnumerable<TEntity>> QueryAsync(Expression<Func<TEntity, bool>> filter, bool includeDeleted = false)
-        {
-            CheckIsConfigured();
+        //public virtual async Task<IEnumerable<TEntity>> QueryAsync(Expression<Func<TEntity, bool>> filter, bool includeDeleted = false)
+        //{
+        //    CheckIsConfigured();
 
-            return await Task.Run(() =>
-            {
-                if (!includeDeleted)
-                {
-                    return _collection.AsQueryable().Where(x => !x.Deleted).Where(filter);
-                }
+        //    return await Task.Run(() =>
+        //    {
+        //        if (!includeDeleted)
+        //        {
+        //            return _collection.AsQueryable().Where(x => !x.Deleted).Where(filter);
+        //        }
 
-                return _collection.AsQueryable().Where(filter);
-            });
-        }
+        //        return _collection.AsQueryable().Where(filter);
+        //    });
+        //}
 
-        public virtual async Task<IEnumerable<TEntity>> QueryAsync(Expression<Func<TEntity, bool>> filter, int maxNumberOfRows, bool includeDeleted = false)
+        public virtual async Task<IEnumerable<TEntity>> QueryAsync(Expression<Func<TEntity, bool>> filter, int maxNumberOfRows = MaxNumberOfRows, bool includeDeleted = false)
         {
             CheckIsConfigured();
 
