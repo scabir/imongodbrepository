@@ -13,6 +13,7 @@
     <PackageTags>mongodb, repository, pattern, db, database, nosql, nuget, package, document</PackageTags>
     <AssemblyVersion>1.3.1.0</AssemblyVersion>
     <FileVersion>1.3.1.0</FileVersion>
+    <RepositoryType>https://raw.githubusercontent.com/scabir/imongodbrepository/master/LICENSE</RepositoryType>
   </PropertyGroup>
 
   <ItemGroup>
