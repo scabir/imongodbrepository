@@ -1,5 +1,5 @@
 ﻿# iMongoDbRepository
-Requires .Net Standard 2.1+
+Requires .Net Standard 2.0+
 
 ## Nuget Package
 ```
