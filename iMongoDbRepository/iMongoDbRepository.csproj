@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <Version>1.4.1</Version>
+    <Version>1.4.2</Version>
     <Authors>Suleyman Ciplak</Authors>
     <Company />
     <Description>A MongoDb repository pattern implementation.</Description>
@@ -11,10 +11,11 @@
     <PackageProjectUrl>https://github.com/scabir/imongodbrepository/</PackageProjectUrl>
     <RepositoryUrl>https://github.com/scabir/imongodbrepository/</RepositoryUrl>
     <PackageTags>mongodb, repository, pattern, db, database, nosql, nuget, package, document</PackageTags>
-    <AssemblyVersion>1.4.1.0</AssemblyVersion>
-    <FileVersion>1.4.1.0</FileVersion>
+    <AssemblyVersion>1.4.2.0</AssemblyVersion>
+    <FileVersion>1.4.2.0</FileVersion>
     <RepositoryType>https://raw.githubusercontent.com/scabir/imongodbrepository/master/LICENSE</RepositoryType>
     <PackageLicenseUrl>https://raw.githubusercontent.com/scabir/imongodbrepository/master/LICENSE</PackageLicenseUrl>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>

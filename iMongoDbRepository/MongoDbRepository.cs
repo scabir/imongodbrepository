@@ -12,7 +12,7 @@ namespace iMongoDbRepository
         where TEntity : class, IMongoDbItem
     {
         public bool Configured { get; protected set; }
-        private IMongoCollection<TEntity> _collection;
+        protected IMongoCollection<TEntity> _collection;
         private DbConfiguration _dbConfiguration;
         private const int MaxNumberOfRows = 100000;
 
