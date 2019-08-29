@@ -34,31 +34,10 @@ namespace iMongoDbRepository
             Configured = true;
         }
 
-        private void CheckIsConfigured()
-        {
-            if (!Configured)
-            {
-                throw new Exception("Repository is not conofigured!");
-            }
-        }
-
         public virtual void Dispose()
         {
             //No need to dispose MongoDB client manually
         }
-
-        //public virtual IEnumerable<TEntity> All(bool includeDeleted = false)
-        //{
-        //    CheckIsConfigured();
-
-        //    if (!includeDeleted)
-        //    {
-        //        return _collection.AsQueryable().Where(x => !x.Deleted).ToEnumerable();
-        //    }
-
-
-        //    return _collection.AsQueryable().ToEnumerable();
-        //}
 
         public virtual IEnumerable<TEntity> All(int maxNumberOfRows = MaxNumberOfRows, bool includeDeleted = false)
         {
@@ -85,21 +64,6 @@ namespace iMongoDbRepository
 
             return result;
         }
-
-        //public virtual async Task<IEnumerable<TEntity>> AllAsync(bool includeDeleted = false)
-        //{
-        //    CheckIsConfigured();
-
-        //    return await Task.Run(() =>
-        //    {
-        //        if (!includeDeleted)
-        //        {
-        //            return _collection.AsQueryable().Where(x => !x.Deleted).ToEnumerable();
-        //        }
-
-        //        return _collection.AsQueryable().ToEnumerable();
-        //    });
-        //}
 
         public virtual async Task<IEnumerable<TEntity>> AllAsync(int maxNumberOfRows = MaxNumberOfRows, bool includeDeleted = false)
         {
@@ -128,18 +92,6 @@ namespace iMongoDbRepository
             return result;
         }
 
-        //public virtual IEnumerable<TEntity> Query(Expression<Func<TEntity, bool>> filter, bool includeDeleted = false)
-        //{
-        //    CheckIsConfigured();
-
-        //    if (!includeDeleted)
-        //    {
-        //        return _collection.AsQueryable().Where(x => !x.Deleted).Where(filter);
-        //    }
-
-        //    return _collection.AsQueryable().Where(filter);
-        //}
-
         public virtual IEnumerable<TEntity> Query(Expression<Func<TEntity, bool>> filter, int maxNumberOfRows = MaxNumberOfRows, bool includeDeleted = false)
         {
             CheckIsConfigured();
@@ -166,21 +118,6 @@ namespace iMongoDbRepository
 
             return result;
         }
-
-        //public virtual async Task<IEnumerable<TEntity>> QueryAsync(Expression<Func<TEntity, bool>> filter, bool includeDeleted = false)
-        //{
-        //    CheckIsConfigured();
-
-        //    return await Task.Run(() =>
-        //    {
-        //        if (!includeDeleted)
-        //        {
-        //            return _collection.AsQueryable().Where(x => !x.Deleted).Where(filter);
-        //        }
-
-        //        return _collection.AsQueryable().Where(filter);
-        //    });
-        //}
 
         public virtual async Task<IEnumerable<TEntity>> QueryAsync(Expression<Func<TEntity, bool>> filter, int maxNumberOfRows = MaxNumberOfRows, bool includeDeleted = false)
         {
@@ -345,96 +282,39 @@ namespace iMongoDbRepository
         public virtual void Insert(TEntity entity)
         {
             CheckIsConfigured();
-
-            entity.CreatedOn = DateTime.UtcNow;
-            entity.ModifiedOn = DateTime.UtcNow;
-            entity.Deleted = false;
-
-            if (_dbConfiguration.AutoGenerateIds)
-            {
-                entity._id = Guid.NewGuid().ToString().Replace("-", "").ToUpper();
-            }
-
-            _collection.InsertOne(entity);
+            _collection.InsertOne(PrepareForInsert(entity));
         }
 
         public virtual async Task InsertAsync(TEntity entity)
         {
             CheckIsConfigured();
-
-            entity.CreatedOn = DateTime.UtcNow;
-            entity.ModifiedOn = DateTime.UtcNow;
-            entity.Deleted = false;
-
-            if (_dbConfiguration.AutoGenerateIds)
-            {
-                entity._id = Guid.NewGuid().ToString().Replace("-", "").ToUpper();
-            }
-
-            await _collection.InsertOneAsync(entity);
+            await _collection.InsertOneAsync(PrepareForInsert(entity));
         }
 
         public virtual void Insert(IEnumerable<TEntity> entities)
         {
             CheckIsConfigured();
-
-            for (int i = 0; i < entities.Count(); i++)
-            {
-                entities.ElementAt(i).CreatedOn = DateTime.UtcNow;
-                entities.ElementAt(i).ModifiedOn = DateTime.UtcNow;
-                entities.ElementAt(i).Deleted = false;
-
-                if (_dbConfiguration.AutoGenerateIds)
-                {
-                    entities.ElementAt(i)._id = Guid.NewGuid().ToString().Replace("-", "").ToUpper();
-                }
-            }
-
-            _collection.InsertMany(entities);
+            _collection.InsertMany(PrepareForInsert(entities));
         }
 
         public virtual async Task InsertAsync(IEnumerable<TEntity> entities)
         {
             CheckIsConfigured();
-
-            for (int i = 0; i < entities.Count(); i++)
-            {
-                entities.ElementAt(i).CreatedOn = DateTime.UtcNow;
-                entities.ElementAt(i).ModifiedOn = DateTime.UtcNow;
-                entities.ElementAt(i).Deleted = false;
-
-                if (_dbConfiguration.AutoGenerateIds)
-                {
-                    entities.ElementAt(i)._id = Guid.NewGuid().ToString().Replace("-", "").ToUpper();
-                }
-            }
-
-            await _collection.InsertManyAsync(entities);
+            await _collection.InsertManyAsync(PrepareForInsert(entities));
         }
 
         public virtual void Update(TEntity entity)
         {
             CheckIsConfigured();
-
-            if (entity == null)
-            {
-                throw new NullReferenceException("Entity cannot be null.");
-            }
-
-            entity.ModifiedOn = DateTime.UtcNow;
+            entity = PrepareForUpdate(entity);
             _collection.ReplaceOne(x => x._id == entity._id, entity);
         }
 
         public virtual async Task UpdateAsync(TEntity entity)
         {
             CheckIsConfigured();
+            entity = PrepareForUpdate(entity);
 
-            if (entity == null)
-            {
-                throw new NullReferenceException("Entity cannot be null.");
-            }
-
-            entity.ModifiedOn = DateTime.UtcNow;
             await _collection.ReplaceOneAsync(x => x._id == entity._id, entity);
         }
 
@@ -607,6 +487,60 @@ namespace iMongoDbRepository
                 item.Deleted = false;
                 await UpdateAsync(item);
             }
+        }
+
+        private void CheckIsConfigured()
+        {
+            if (!Configured)
+            {
+                throw new Exception("Repository is not configured!");
+            }
+        }
+
+        private TEntity PrepareForInsert(TEntity entity)
+        {
+            entity.CreatedOn = DateTime.UtcNow;
+            entity.ModifiedOn = DateTime.UtcNow;
+            entity.Deleted = false;
+
+            if (_dbConfiguration.AutoGenerateIds)
+            {
+                entity._id = Guid.NewGuid().ToString().Replace("-", "").ToUpper();
+            }
+
+            return entity;
+        }
+
+        private IEnumerable<TEntity> PrepareForInsert(IEnumerable<TEntity> entities)
+        {
+            var preparedEntities = new List<TEntity>();
+
+            for (int i = 0; i < entities.Count(); i++)
+            {
+                preparedEntities.Add(PrepareForInsert(entities.ElementAt(i)));
+            }
+
+            return preparedEntities;
+        }
+
+        private TEntity PrepareForUpdate(TEntity entity)
+        {
+            if (entity == null)
+            {
+                throw new NullReferenceException("Entity cannot be null.");
+            }
+
+            var existingItem = Query(x => x._id == entity._id).FirstOrDefault();
+
+            if (existingItem == null)
+            {
+                throw new NullReferenceException("No entities foud for updating.");
+            }
+
+            entity.CreatedOn = existingItem.CreatedOn;
+            entity.ModifiedOn = DateTime.UtcNow;
+
+            return entity;
         }
     }
 }
