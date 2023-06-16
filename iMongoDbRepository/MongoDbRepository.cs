@@ -352,7 +352,6 @@ namespace iMongoDbRepository
             entity = entity._id == null ? PrepareForInsert(entity) : PrepareForUpdate(entity);
 
             var filter = Builders<TEntity>.Filter.Eq(x => x._id, entity._id);
-
             await _collection.ReplaceOneAsync(filter, entity, new ReplaceOptions { IsUpsert = true });
         }
 
@@ -483,16 +482,11 @@ namespace iMongoDbRepository
 
         private TEntity PrepareForUpdate(TEntity entity)
         {
-            if (entity == null)
-            {
-                throw new NullReferenceException("Entity cannot be null.");
-            }
-
             var existingItem = Query(x => x._id == entity._id).FirstOrDefault();
 
             if (existingItem == null)
             {
-                throw new NullReferenceException("No entities foud for updating.");
+                throw new NullReferenceException("No entities found for updating.");
             }
 
             entity.CreatedOn = existingItem.CreatedOn;
