@@ -263,10 +263,11 @@ namespace iMongoDbRepository
 
             if (!includeDeleted)
             {
-                return _collection.AsQueryable().FirstOrDefault(filter) != null;
+                var combinedFilter = CombineFilter(filter, x => !x.Deleted);
+                return _collection.AsQueryable().FirstOrDefault(combinedFilter) != null;
             }
 
-            return _collection.AsQueryable().Where(x => !x.Deleted).FirstOrDefault(filter) != null;
+            return _collection.AsQueryable().FirstOrDefault(filter) != null;
         }
 
         public virtual async Task<bool> AnyAsync(Expression<Func<TEntity, bool>> filter, bool includeDeleted = false)
@@ -277,10 +278,11 @@ namespace iMongoDbRepository
             {
                 if (!includeDeleted)
                 {
-                    return _collection.AsQueryable().FirstOrDefault(filter) != null;
+                    var combinedFilter = CombineFilter(filter, x => !x.Deleted);
+                    return _collection.AsQueryable().FirstOrDefault(combinedFilter) != null;
                 }
 
-                return _collection.AsQueryable().Where(x => !x.Deleted).FirstOrDefault(filter) != null;
+                return _collection.AsQueryable().FirstOrDefault(filter) != null;
             });
         }
 
@@ -332,26 +334,13 @@ namespace iMongoDbRepository
                 throw new NullReferenceException("Entity cannot be null.");
             }
 
-            if (entity._id == null)
-            {
-                Insert(entity);
-            }
-            else
-            {
-                var item = Get(entity._id);
+            entity = entity._id == null ? PrepareForInsert(entity) : PrepareForUpdate(entity);
 
-                if (Any(x => x._id == entity._id))
-                {
-                    Update(entity);
-                }
-                else
-                {
-                    Insert(entity);
-                }
-            }
+            var filter = Builders<TEntity>.Filter.Eq(x => x._id, entity._id);
+            _collection.ReplaceOne(filter, entity, new ReplaceOptions { IsUpsert = true });
         }
 
-        public virtual async void UpsertAsync(TEntity entity)
+        public virtual async Task UpsertAsync(TEntity entity)
         {
             CheckIsConfigured();
 
@@ -360,21 +349,11 @@ namespace iMongoDbRepository
                 throw new NullReferenceException("Entity cannot be null.");
             }
 
-            if (entity._id == null)
-            {
-                await InsertAsync(entity);
-            }
-            else
-            {
-                if (await AnyAsync(x => x._id == entity._id))
-                {
-                    await UpdateAsync(entity);
-                }
-                else
-                {
-                    await InsertAsync(entity);
-                }
-            }
+            entity = entity._id == null ? PrepareForInsert(entity) : PrepareForUpdate(entity);
+
+            var filter = Builders<TEntity>.Filter.Eq(x => x._id, entity._id);
+
+            await _collection.ReplaceOneAsync(filter, entity, new ReplaceOptions { IsUpsert = true });
         }
 
         public virtual void Delete(string entityId, bool hardDelete = false)
@@ -387,13 +366,9 @@ namespace iMongoDbRepository
             }
             else
             {
-                var item = Get(entityId);
+                var update = Builders<TEntity>.Update.Set(x => x.Deleted, true);
 
-                if (item != null)
-                {
-                    item.Deleted = true;
-                    Update(item);
-                }
+                _collection.UpdateOne(x => x._id == entityId, update);
             }
         }
 
@@ -407,16 +382,11 @@ namespace iMongoDbRepository
             }
             else
             {
-                var item = await GetAsync(entityId);
+                var update = Builders<TEntity>.Update.Set(x => x.Deleted, true);
 
-                if (item != null)
-                {
-                    item.Deleted = true;
-                    await UpdateAsync(item);
-                }
+                await _collection.UpdateOneAsync(x => x._id == entityId, update);
             }
         }
-
         public virtual void Delete(IEnumerable<string> entityIds, bool hardDelete = false)
         {
             CheckIsConfigured();
@@ -427,16 +397,10 @@ namespace iMongoDbRepository
             }
             else
             {
-                for (int i = 0; i < entityIds.Count(); i++)
-                {
-                    var item = Get(entityIds.ElementAt(i));
+                var filter = Builders<TEntity>.Filter.In(x => x._id, entityIds);
+                var update = Builders<TEntity>.Update.Set(x => x.Deleted, true);
 
-                    if (item != null)
-                    {
-                        item.Deleted = true;
-                        Update(item);
-                    }
-                }
+                _collection.UpdateMany(filter, update);
             }
         }
 
@@ -450,21 +414,10 @@ namespace iMongoDbRepository
             }
             else
             {
-                var items = await Task.Run(() =>
-                {
-                    return _collection.AsQueryable().Where(x => entityIds.Contains(x._id));
-                });
+                var filter = Builders<TEntity>.Filter.In(x => x._id, entityIds);
+                var update = Builders<TEntity>.Update.Set(x => x.Deleted, true);
 
-                for (int i = 0; i < entityIds.Count(); i++)
-                {
-                    var item = items.FirstOrDefault(x => x._id == entityIds.ElementAt(i));
-
-                    if (item != null)
-                    {
-                        item.Deleted = true;
-                        await UpdateAsync(item);
-                    }
-                }
+                await _collection.UpdateManyAsync(filter, update);
             }
         }
 
@@ -546,6 +499,21 @@ namespace iMongoDbRepository
             entity.ModifiedOn = DateTime.UtcNow;
 
             return entity;
+        }
+
+        private Expression<Func<TEntity, bool>> CombineFilter(Expression<Func<TEntity, bool>> firstFilter, Expression<Func<TEntity, bool>> secondFilter)
+        {
+            var parameter = Expression.Parameter(typeof(TEntity));
+
+            var combined = Expression.Lambda<Func<TEntity, bool>>(
+                Expression.AndAlso(
+                    Expression.Invoke(firstFilter, parameter),
+                    Expression.Invoke(secondFilter, parameter)
+                ),
+                parameter
+            );
+
+            return combined;
         }
     }
 }
