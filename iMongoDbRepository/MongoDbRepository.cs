@@ -48,26 +48,8 @@ namespace iMongoDbRepository
         {
             CheckIsConfigured();
 
-            var result = new List<TEntity>();
-            var cursor = includeDeleted
-                ? _collection.FindAsync(x => true, new FindOptions<TEntity>()).Result
-                : _collection.FindAsync(x => !x.Deleted, new FindOptions<TEntity>()).Result;
-
-            using (cursor)
-            {
-                while (cursor.MoveNextAsync().Result)
-                {
-                    if (result.Count() + cursor.Current.Count() >= maxNumberOfRows)
-                    {
-                        result.AddRange(cursor.Current.Take(maxNumberOfRows - result.Count));
-                        break;
-                    }
-
-                    result.AddRange(cursor.Current);
-                }
-            }
-
-            return result;
+            var filter = includeDeleted ? Builders<TEntity>.Filter.Empty : Builders<TEntity>.Filter.Eq(e => e.Deleted, false);
+            return _collection.Find(filter).Limit(maxNumberOfRows).ToList();
         }
 
         public virtual async Task<IEnumerable<TEntity>> AllAsync(int maxNumberOfRows = MaxNumberOfRows, bool includeDeleted = false)
@@ -79,19 +61,16 @@ namespace iMongoDbRepository
             var cursor = includeDeleted
                 ? await _collection.FindAsync(x => true, new FindOptions<TEntity>())
                 : await _collection.FindAsync(x => !x.Deleted, new FindOptions<TEntity>());
-            
-            using (cursor)
-            {
-                while (await cursor.MoveNextAsync())
-                {
-                    if (result.Count() + cursor.Current.Count() >= maxNumberOfRows)
-                    {
-                        result.AddRange(cursor.Current.Take(maxNumberOfRows - result.Count));
-                        break;
-                    }
 
-                    result.AddRange(cursor.Current);
+            while (await cursor.MoveNextAsync())
+            {
+                if (result.Count + cursor.Current.Count() >= maxNumberOfRows)
+                {
+                    result.AddRange(cursor.Current.Take(maxNumberOfRows - result.Count));
+                    break;
                 }
+
+                result.AddRange(cursor.Current);
             }
 
             return result;
@@ -448,7 +427,6 @@ namespace iMongoDbRepository
                 }
             }
         }
-
 
         private TEntity PrepareForInsert(TEntity entity)
         {
