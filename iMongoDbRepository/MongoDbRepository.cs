@@ -470,30 +470,24 @@ namespace iMongoDbRepository
 
         private IEnumerable<TEntity> PrepareForInsert(IEnumerable<TEntity> entities)
         {
-            var preparedEntities = new List<TEntity>();
-
-            for (int i = 0; i < entities.Count(); i++)
+            foreach (var entity in entities)
             {
-                preparedEntities.Add(PrepareForInsert(entities.ElementAt(i)));
+                yield return PrepareForInsert(entity);
             }
-
-            return preparedEntities;
         }
 
         private TEntity PrepareForUpdate(TEntity entity)
         {
-            var existingItem = Query(x => x._id == entity._id).FirstOrDefault();
-
-            if (existingItem == null)
+            if (entity == null)
             {
-                throw new NullReferenceException("No entities found for updating.");
+                throw new NullReferenceException("Entity cannot be null.");
             }
 
-            entity.CreatedOn = existingItem.CreatedOn;
             entity.ModifiedOn = DateTime.UtcNow;
 
             return entity;
         }
+
 
         private Expression<Func<TEntity, bool>> CombineFilter(Expression<Func<TEntity, bool>> firstFilter, Expression<Func<TEntity, bool>> secondFilter)
         {
