@@ -354,6 +354,7 @@ namespace iMongoDbRepository
                 await _collection.UpdateOneAsync(x => x._id == entityId, update);
             }
         }
+
         public virtual void Delete(IEnumerable<string> entityIds, bool hardDelete = false)
         {
             CheckIsConfigured();
