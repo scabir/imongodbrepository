@@ -11,13 +11,18 @@ namespace iMongoDbRepository
     public abstract class MongoDbRepository<TEntity> : IRepository<TEntity>
         where TEntity : class, IMongoDbItem
     {
-        public bool Configured { get; protected set; }
+        public bool Configured => _collection != null && _dbConfiguration != null;
         protected IMongoCollection<TEntity> _collection;
         private DbConfiguration _dbConfiguration;
         private const int MaxNumberOfRows = 100000;
 
         public void Configure(DbConfiguration dbConfiguration)
         {
+            if (dbConfiguration == null)
+            {
+                throw new ArgumentNullException(nameof(dbConfiguration));
+            }
+
             _dbConfiguration = dbConfiguration;
             //Set up MongoDb client
             var client = new MongoClient(_dbConfiguration.ConnectionString);
@@ -31,7 +36,7 @@ namespace iMongoDbRepository
                 _collection = database.GetCollection<TEntity>(_dbConfiguration.Collection);
             }
 
-            Configured = true;
+            CheckIsConfigured();
         }
 
         public virtual void Dispose()
