@@ -237,53 +237,42 @@ namespace iMongoDbRepository
 
             if (!includeDeleted)
             {
-                return _collection.AsQueryable().FirstOrDefault() != null;
+                return _collection.AsQueryable().Any();
             }
 
-            return _collection.AsQueryable().FirstOrDefault(x => !x.Deleted) != null;
+            return _collection.AsQueryable().Any(x => !x.Deleted);
         }
 
         public virtual async Task<bool> AnyAsync(bool includeDeleted = false)
         {
             CheckIsConfigured();
 
-            return await Task.Run(() => {
-                if (!includeDeleted)
-                {
-                    return _collection.AsQueryable().FirstOrDefault() != null;
-                }
+            if (!includeDeleted)
+            {
+                return await _collection.AsQueryable().AnyAsync();
+            }
 
-                return _collection.AsQueryable().FirstOrDefault(x => !x.Deleted) != null;
-            });
+            return await _collection.AsQueryable().AnyAsync(x => !x.Deleted);
         }
 
         public virtual bool Any(Expression<Func<TEntity, bool>> filter, bool includeDeleted = false)
         {
             CheckIsConfigured();
 
-            if (!includeDeleted)
-            {
-                var combinedFilter = CombineFilter(filter, x => !x.Deleted);
-                return _collection.AsQueryable().FirstOrDefault(combinedFilter) != null;
-            }
+            var filterBuilder = Builders<TEntity>.Filter;
+            var finalFilter = includeDeleted ? filter : filterBuilder.And(filter, filterBuilder.Eq(x => x.Deleted, false));
 
-            return _collection.AsQueryable().FirstOrDefault(filter) != null;
+            return _collection.Find(finalFilter).Any();
         }
 
         public virtual async Task<bool> AnyAsync(Expression<Func<TEntity, bool>> filter, bool includeDeleted = false)
         {
             CheckIsConfigured();
 
-            return await Task.Run(() =>
-            {
-                if (!includeDeleted)
-                {
-                    var combinedFilter = CombineFilter(filter, x => !x.Deleted);
-                    return _collection.AsQueryable().FirstOrDefault(combinedFilter) != null;
-                }
+            var filterBuilder = Builders<TEntity>.Filter;
+            var finalFilter = includeDeleted ? filter : filterBuilder.And(filter, filterBuilder.Eq(x => x.Deleted, false));
 
-                return _collection.AsQueryable().FirstOrDefault(filter) != null;
-            });
+            return await _collection.Find(finalFilter).AnyAsync();
         }
 
         public virtual void Insert(TEntity entity)
