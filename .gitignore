@@ -43,3 +43,4 @@ EverLog.Client.nuspec
 
 # dotCover
 *.dotCover
+/.nuspec
