@@ -483,21 +483,5 @@ namespace iMongoDbRepository
 
             return entity;
         }
-
-
-        private Expression<Func<TEntity, bool>> CombineFilter(Expression<Func<TEntity, bool>> firstFilter, Expression<Func<TEntity, bool>> secondFilter)
-        {
-            var parameter = Expression.Parameter(typeof(TEntity));
-
-            var combined = Expression.Lambda<Func<TEntity, bool>>(
-                Expression.AndAlso(
-                    Expression.Invoke(firstFilter, parameter),
-                    Expression.Invoke(secondFilter, parameter)
-                ),
-                parameter
-            );
-
-            return combined;
-        }
     }
 }
