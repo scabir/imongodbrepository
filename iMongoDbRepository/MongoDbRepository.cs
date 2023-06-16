@@ -439,9 +439,16 @@ namespace iMongoDbRepository
         {
             if (!Configured)
             {
-                throw new Exception("Repository is not configured!");
+                throw new Exception("The repository is not configured. Make sure the configuration is done properly before using the repository.");
+
+                // Hypothetical additional check and message
+                if (_dbConfiguration.ConnectionString == null || string.IsNullOrEmpty(_dbConfiguration.ConnectionString))
+                {
+                    throw new Exception("The repository is not configured. The connection string is null or empty. Make sure the connection string is set up correctly in the configuration.");
+                }
             }
         }
+
 
         private TEntity PrepareForInsert(TEntity entity)
         {
