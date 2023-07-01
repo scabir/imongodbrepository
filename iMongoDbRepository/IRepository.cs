@@ -142,5 +142,18 @@ namespace iMongoDbRepository
         /// </summary>
         /// <param name="entity"></param>
         Task UpdateAsync(TEntity entity);
+
+        /// <summary>
+        /// Deletes all hard-deleted records from the database that are older than the specified number of days.
+        /// </summary>
+        /// <param name="days">The number of days to consider when deleting records. Defaults to 30.</param>
+        void CleanHardDeleted(int days = 30);
+
+        /// <summary>
+        /// Deletes all hard-deleted records from the database that are older than the specified number of days asynchronously.
+        /// </summary>
+        /// <param name="days">The number of days to consider when deleting records. Defaults to 30.</param>
+        /// <returns>A task that represents the asynchronous delete operation.</returns>
+        Task CleanHardDeletedAsync(int days = 30);
     }
 }

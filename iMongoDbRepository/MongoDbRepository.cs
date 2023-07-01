@@ -415,6 +415,30 @@ namespace iMongoDbRepository
             }
         }
 
+        public virtual void CleanHardDeleted(int days = 30)
+        {
+            CheckIsConfigured();
+
+            var filter = Builders<TEntity>.Filter;
+            var dateFilter = filter.Lt(x => x.ModifiedOn, DateTime.UtcNow.AddDays(-days));
+            var deletedFilter = filter.Eq(x => x.Deleted, true);
+            var finalFilter = filter.And(dateFilter, deletedFilter);
+
+            _collection.DeleteMany(finalFilter);
+        }
+
+        public virtual async Task CleanHardDeletedAsync(int days = 30)
+        {
+            CheckIsConfigured();
+
+            var filter = Builders<TEntity>.Filter;
+            var dateFilter = filter.Lt(x => x.ModifiedOn, DateTime.UtcNow.AddDays(-days));
+            var deletedFilter = filter.Eq(x => x.Deleted, true);
+            var finalFilter = filter.And(dateFilter, deletedFilter);
+
+            await _collection.DeleteManyAsync(finalFilter);
+        }
+
         private void CheckIsConfigured()
         {
             if (!Configured)
